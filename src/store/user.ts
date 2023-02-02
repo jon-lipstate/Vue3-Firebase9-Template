@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+//
 import {
   createUserWithEmailAndPassword,
   ParsedToken,
@@ -8,8 +9,11 @@ import {
   User,
   UserCredential,
 } from "firebase/auth";
-import { auth } from "@/firebase-config";
-
+import { collection, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
+//
+import { auth, functions, db } from "@/firebase-config";
+//
 export const useUserStore = defineStore("user", {
   state: () => {
     return {
@@ -17,6 +21,8 @@ export const useUserStore = defineStore("user", {
       user: null,
       /** @type ParsedToken | null */
       claims: null,
+      /**@type:any */
+      allUsers: null,
     };
   },
   persist: {
@@ -31,10 +37,14 @@ export const useUserStore = defineStore("user", {
     isAuth(state) {
       return !!state.user;
     },
+    isAdmin(state) {
+      return state.claims.admin;
+    },
+    getAllUsers(state) {
+      return state.allUsers;
+    },
   },
   actions: {
-    // any amount of arguments, return a promise or not
-    // you can directly mutate the state
     clearAuth() {
       this.user = null;
     },
@@ -71,7 +81,47 @@ export const useUserStore = defineStore("user", {
       return error;
     },
     async logout() {
+      // Important: fireAuth Plugin is what sets the user in the store
       await signOut(auth);
+    },
+    //ADMIN Calls
+    async setAdmin(email: string, isAdmin: boolean) {
+      const fn = httpsCallable(functions, "setAdmin");
+      const result = await fn({ email, isAdmin });
+      return result?.data;
+    },
+    async setAccessLevel(email: string, level: number) {
+      const fn = httpsCallable(functions, "setAccessLevel");
+      const result = await fn({ email, level });
+      return result?.data;
+    },
+    async fetchAllUsers() {
+      this.allUsers = [];
+      if (!this.claims.admin) {
+        this.allUsers = null;
+      } else {
+        console.log("fetchAllUsers");
+        const usersRef = collection(db, "users");
+        const docs = await getDocs(usersRef);
+        docs.forEach((d) => this.allUsers.push(d.data()));
+      }
+    },
+    async deleteUser(email: string) {
+      const fn = httpsCallable(functions, "deleteUser");
+      const result = await fn({ email });
+      return result?.data;
+    },
+    updateUser(email: string, items: any) {
+      const index = this.allUsers.findIndex((x: any) => x.email == email);
+      if (index < 0) {
+        console.error(`Bad Index for ${email}`);
+      } else this.allUsers[index] = { ...this.allUsers[index], ...items };
+    },
+    removeUser(email: string) {
+      const index = this.allUsers.findIndex((x: any) => x.email == email);
+      if (index < 0) {
+        console.error(`Bad Index for ${email}`);
+      } else this.allUsers.splice(index, 1);
     },
   },
 });

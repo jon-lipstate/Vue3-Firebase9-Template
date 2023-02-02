@@ -14,7 +14,13 @@ export default {
           if (user) {
             const tokenResult = await user.getIdTokenResult();
             const claims = tokenResult.claims;
-            return resolve(userStore.setAuth(user, claims));
+            return resolve(
+              userStore.setAuth(user, {
+                admin: claims.admin,
+                accessLevel: claims.accessLevel,
+                // other: claims,
+              })
+            );
           }
           return resolve(userStore.clearAuth());
         } catch (e) {

@@ -1,4 +1,9 @@
 // Composables
+import type {
+  RouteLocationNormalized,
+  NavigationGuardNext,
+  NavigationGuard,
+} from "vue-router";
 import { createRouter, createWebHistory } from "vue-router";
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
@@ -30,7 +35,7 @@ const routes = [
       {
         path: "/dashboard",
         name: "Dashboard",
-        beforeEnter: authGuard,
+        beforeEnter: adminGuard,
         component: Dashboard,
       },
     ],
@@ -45,12 +50,23 @@ const router = createRouter({
 export default router;
 
 import { useUserStore } from "@/store/user";
-import { auth } from "@/firebase-config";
-import { setMaxIdleHTTPParsers } from "http";
-// @ts-ignore
-function authGuard(to, from, next) {
+function authGuard(
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+  next: NavigationGuardNext
+) {
   const userStore = useUserStore();
   const isAuth = userStore.isAuth;
   if (isAuth) next();
   else next("/login");
+}
+function adminGuard(
+  to: RouteLocationNormalized,
+  from: RouteLocationNormalized,
+  next: NavigationGuardNext
+) {
+  const userStore = useUserStore();
+  const isAdmin = userStore.isAdmin;
+  if (isAdmin) next();
+  else next("/");
 }
