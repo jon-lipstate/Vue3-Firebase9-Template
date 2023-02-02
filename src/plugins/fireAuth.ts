@@ -1,6 +1,6 @@
 import type { App } from "vue";
 import { useUserStore } from "@/store/user";
-
+import router from "@/router/index";
 import { auth } from "@/firebase-config";
 // This file auto-triggers store updates on auth state changes
 export default {
@@ -21,8 +21,10 @@ export default {
                 // other: claims,
               })
             );
+          } else {
+            router.push("/");
+            return resolve(userStore.clearAuth());
           }
-          return resolve(userStore.clearAuth());
         } catch (e) {
           console.error("fireAuth error", e);
         }

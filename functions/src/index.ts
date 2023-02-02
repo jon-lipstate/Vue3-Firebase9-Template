@@ -84,7 +84,6 @@ async function delUser(data: any, context: any) {
 async function addUserInFirestore(user: UserRecord, context: any) {
   const newUser = {
     uid: user.uid,
-    name: user.displayName, // This will be null, it is updated after registration. need to poll for it later
     email: user.email,
     emailVerified: user.emailVerified,
     isAdmin: false,

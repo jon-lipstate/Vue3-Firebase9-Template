@@ -9,7 +9,15 @@ import {
   User,
   UserCredential,
 } from "firebase/auth";
-import { collection, doc, setDoc, getDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  terminate,
+} from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 //
 import { auth, functions, db } from "@/firebase-config";
@@ -64,7 +72,7 @@ export const useUserStore = defineStore("user", {
           password
         );
         updateProfile(credential.user, { displayName: name });
-        // this.user = credential.user;
+        setTimeout(() => this.updateAccount(email, { name }), 2000);
       } catch (e: any) {
         console.error(e);
         return e.code?.split("/")[1];
@@ -84,7 +92,9 @@ export const useUserStore = defineStore("user", {
       // Important: fireAuth Plugin is what sets the user in the store
       await signOut(auth);
     },
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     //ADMIN Calls
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     async setAdmin(email: string, isAdmin: boolean) {
       const fn = httpsCallable(functions, "setAdmin");
       const result = await fn({ email, isAdmin });
@@ -104,6 +114,7 @@ export const useUserStore = defineStore("user", {
         const usersRef = collection(db, "users");
         const docs = await getDocs(usersRef);
         docs.forEach((d) => this.allUsers.push(d.data()));
+        // // terminate(db);
       }
     },
     async deleteUser(email: string) {
@@ -111,6 +122,15 @@ export const useUserStore = defineStore("user", {
       const result = await fn({ email });
       return result?.data;
     },
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+    // db activities
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
+    updateAccount(email: string, items: any) {
+      const userDoc = doc(db, `users`, email);
+      updateDoc(userDoc, items);
+      // terminate(db);
+    },
+    //\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\//\\
     updateUser(email: string, items: any) {
       const index = this.allUsers.findIndex((x: any) => x.email == email);
       if (index < 0) {
