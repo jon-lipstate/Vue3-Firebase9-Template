@@ -117,8 +117,6 @@ const setAccessLevel = async (email: string, level: number) => {
 const deleteUser = async (email: string) => {
   const res = (await userStore.deleteUser(email)) as any;
   if (res) {
-    // const docRef = doc(db, `users/${email}`);
-    // await deleteDoc(docRef);
     userStore.removeUser(email);
   }
 };
