@@ -2,12 +2,7 @@
   "hosting": {
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
-    "rewrites": [
-      {
-        "source": "**",
-        "function": "ssr"
-      }
-    ],
+    "predeploy": ["npm run build"],
     "headers": [
       {
         "source": "**/*.js",
@@ -35,6 +30,12 @@
             "value": "max-age=8640000"
           }
         ]
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
   },

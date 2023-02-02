@@ -3,7 +3,7 @@
 
 const functions = require("firebase-functions");
 const { initializeApp } = require("firebase-admin/app");
-const { getAuth, deleteUser } = require("firebase-admin/auth");
+const { getAuth } = require("firebase-admin/auth");
 const { getFirestore } = require("firebase-admin/firestore");
 // const { getDatabase } = require("firebase-admin/database");
 import type { UserRecord } from "firebase-admin/auth";

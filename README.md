@@ -24,3 +24,8 @@ Public Domain
 ## Contributing
 
 I'm open to PRs that improve the project's clarity/tidyness, or flesh out the user management system a bit more.
+
+## TODOs
+
+- update firestore with username on sign in
+- 
